@@ -2,7 +2,7 @@
     OrcaHub UI Library - executor-friendly Roblox UI library
 
     local OrcaHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/donhubroblox/orcahubui_chatgpt/main/OrcaHub.lua"))()
-    local Window = OrcaHub:CreateWindow({ Title = "OrcaHub", Footer = "v1.0" })
+    local Window = OrcaHub:CreateWindow({ Title = "OrcaHub", Footer = "v2.0" })
     local Tab = Window:Tab({ Name = "Main", Icon = "house" })
     local Section = Tab:Section({ Name = "Player", Side = "Left" })
     Section:Toggle({ Name = "Example toggle", Default = false, Callback = function(value) end })
@@ -102,7 +102,7 @@ function Library:CreateWindow(options)
 	local brand = make("Frame", { Size = UDim2.new(1, 0, 0, 68), BackgroundTransparency = 1 }, sidebar)
 	local brandIcon = iconImage(brand, options.Icon or "wind", 23)
 	if brandIcon then brandIcon.Position = UDim2.new(0, 18, 0.5, -11); brandIcon.ImageColor3 = theme.Accent end
-	local brandName = label(brand, options.Title or "OrcaHub", 17, theme.Text, Enum.Font.GothamSemibold)
+	local brandName = label(brand, options.Title or "OrcaHub", 17, theme.Text, Enum.Font.GothamBold)
 	brandName.Position = UDim2.new(0, brandIcon and 52 or 20, 0, 0); brandName.Size = UDim2.new(1, -60, 1, 0)
 	make("Frame", { Position = UDim2.new(0, 16, 1, -1), Size = UDim2.new(1, -32, 0, 1), BackgroundColor3 = theme.Stroke, BorderSizePixel = 0 }, brand)
 
@@ -114,7 +114,7 @@ function Library:CreateWindow(options)
 
 	local content = make("Frame", { Position = UDim2.new(0, 190, 0, 0), Size = UDim2.new(1, -190, 1, 0), BackgroundTransparency = 1 }, root)
 	local topbar = make("Frame", { Size = UDim2.new(1, 0, 0, 76), BackgroundTransparency = 1 }, content)
-	local pageTitle = label(topbar, "Main", 19, theme.Text, Enum.Font.GothamSemibold)
+	local pageTitle = label(topbar, "Main", 19, theme.Text, Enum.Font.GothamBold)
 	pageTitle.Position = UDim2.new(0, 25, 0, 10); pageTitle.Size = UDim2.new(0, 260, 0, 25)
 	local pageHint = label(topbar, "Main Features", 12, theme.SubText)
 	pageHint.Position = UDim2.new(0, 26, 0, 35); pageHint.Size = UDim2.new(0, 260, 0, 18)
@@ -485,7 +485,7 @@ function Library:CreateWindow(options)
 		round(toast, 10); outline(toast, theme.Stroke)
 		local accent = make("Frame", { Position = UDim2.new(0, 0, 0, 10), Size = UDim2.new(0, 3, 1, -20), BackgroundColor3 = theme.Accent, BorderSizePixel = 0, ZIndex = 12 }, toast)
 		round(accent, 3)
-		local toastTitle = label(toast, config.Title or "OrcaHub", 13, theme.Text, Enum.Font.GothamSemibold)
+		local toastTitle = label(toast, config.Title or "OrcaHub", 13, theme.Text, Enum.Font.GothamBold)
 		toastTitle.Position = UDim2.new(0, 15, 0, 10); toastTitle.Size = UDim2.new(1, -26, 0, 20); toastTitle.ZIndex = 12
 		local toastContent = label(toast, config.Content or config.Description or "", 12, theme.SubText)
 		toastContent.Position = UDim2.new(0, 15, 0, 32); toastContent.Size = UDim2.new(1, -26, 0, 30); toastContent.TextWrapped = true; toastContent.ZIndex = 12

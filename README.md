@@ -79,3 +79,7 @@ You may also use the `lucide-` prefix in the map key. Icons are optional; the co
 - `Window:Destroy()`
 
 Sections collapse from their headers. The layout adapts to the viewport and stacks its columns on narrower screens. Configure colors with `CreateWindow({ Theme = { Accent = Color3.fromRGB(...) } })`. Window entrance, page transitions, controls, minimize/close, and toast notifications are animated. `CreateWindow()` destroys the prior OrcaHub window before creating a new one. `Window:Destroy()` disconnects library-managed listeners and removes the UI.
+
+## Test status
+
+The UI code and example pass the [rbx-ui-testkit](https://github.com/donhubroblox/rbx-ui-testkit) syntax check, desktop and mobile fuzz runs, and targeted interaction checks. The test kit simulates Roblox APIs but does not render the interface, so final visual tuning still needs an in-game check.
