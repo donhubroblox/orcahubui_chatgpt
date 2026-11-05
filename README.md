@@ -1,0 +1,69 @@
+# OrcaHub UI
+
+A compact, executor-friendly Roblox UI library focused on a clean dark interface, soft violet accents, and simple script-facing controls.
+
+## Load
+
+Once this repository is published, replace `main` below with the branch or tag you want to use:
+
+```lua
+local OrcaHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/donhubroblox/orcahubui_chatgpt/main/OrcaHub.lua"))()
+```
+
+## Quick example
+
+```lua
+local OrcaHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/donhubroblox/orcahubui_chatgpt/main/OrcaHub.lua"))()
+
+local Window = OrcaHub:CreateWindow({
+    Title = "OrcaHub",
+    Footer = "Made for your scripts",
+})
+
+local Main = Window:Tab({ Name = "Main", Icon = "house", Description = "Main Features" })
+local Player = Main:Section({ Name = "Player", Icon = "user-round", Side = "Left" })
+
+Player:Toggle({
+    Name = "Example toggle",
+    Flag = "ExampleToggle",
+    Default = false,
+    Callback = function(enabled)
+        print("Example toggle:", enabled)
+    end,
+})
+
+Player:Button({
+    Name = "Print message",
+    Callback = function()
+        print("Hello from OrcaHub")
+    end,
+})
+
+Player:Label({ Name = "A clean starting point for your script." })
+```
+
+## Lucide icons
+
+Tabs and sections accept Lucide icon names. The library does not download assets automatically; provide an image map once your chosen Lucide image assets are available:
+
+```lua
+OrcaHub:LoadIcons({
+    ["house"] = "rbxassetid://YOUR_IMAGE_ASSET_ID",
+    ["user-round"] = "rbxassetid://YOUR_IMAGE_ASSET_ID",
+})
+```
+
+You may also use the `lucide-` prefix in the map key. Icons are optional; the controls remain usable when an icon is missing.
+
+## Current API
+
+- `OrcaHub:CreateWindow({ Title, Footer, Icon })`
+- `Window:Tab({ Name, Icon, Description })`
+- `Tab:Section({ Name, Icon, Side = "Left" | "Right" })`
+- `Section:Toggle({ Name, Default, Flag, Callback })`
+- `Section:Button({ Name, Callback })`
+- `Section:Label({ Name })`
+- `OrcaHub:LoadIcons(imageMap)`
+- `Window:Destroy()`
+
+This is an early design-focused version. Dropdowns, sliders, keybinds, persistence, and search filtering are not implemented yet.
