@@ -4,7 +4,7 @@ A compact, executor-friendly Roblox UI library focused on a clean dark interface
 
 ## Load
 
-Once this repository is published, replace `main` below with the branch or tag you want to use:
+Load the library from the repository's `main` branch:
 
 ```lua
 local OrcaHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/donhubroblox/orcahubui_chatgpt/main/OrcaHub.lua"))()
@@ -48,8 +48,8 @@ Tabs and sections accept Lucide icon names. The library does not download assets
 
 ```lua
 OrcaHub:LoadIcons({
-    ["house"] = "rbxassetid://YOUR_IMAGE_ASSET_ID",
-    ["user-round"] = "rbxassetid://YOUR_IMAGE_ASSET_ID",
+    ["house"] = "rbxassetid://YOUR_UPLOADED_LUCIDE_ICON_ID",
+    ["user-round"] = "rbxassetid://YOUR_UPLOADED_LUCIDE_ICON_ID",
 })
 ```
 
@@ -64,6 +64,8 @@ You may also use the `lucide-` prefix in the map key. Icons are optional; the co
 - `Section:Button({ Name, Callback })`
 - `Section:Label({ Name })`
 - `OrcaHub:LoadIcons(imageMap)`
+- Search filters control names on the active tab.
+- `Window:SetVisible(boolean)` and `Window:Toggle()`
 - `Window:Destroy()`
 
-This is an early design-focused version. Dropdowns, sliders, keybinds, persistence, and search filtering are not implemented yet.
+`Window:Destroy()` disconnects the library's input listeners and removes its UI. Dropdowns, sliders, keybinds, persistence, and theme editing are planned for later iterations.

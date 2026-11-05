@@ -1,17 +1,15 @@
 --[[
     OrcaHub UI Library - executor-friendly Roblox UI library
 
-    local OrcaHub = loadstring(game:HttpGet("YOUR_RAW_URL"))()
+    local OrcaHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/donhubroblox/orcahubui_chatgpt/main/OrcaHub.lua"))()
     local Window = OrcaHub:CreateWindow({ Title = "OrcaHub", Footer = "v1.0" })
     local Tab = Window:Tab({ Name = "Main", Icon = "house" })
     local Section = Tab:Section({ Name = "Player", Side = "Left" })
     Section:Toggle({ Name = "Example toggle", Default = false, Callback = function(value) end })
 ]]
 
-local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
 
 local Library = {
 	Flags = {},
@@ -58,6 +56,7 @@ local function label(parent, text, size, color, font)
 end
 
 function Library:LoadIcons(map)
+	if type(map) ~= "table" then return end
 	for name, image in pairs(map) do self.Icons[name] = image end
 end
 
@@ -70,7 +69,13 @@ end
 function Library:CreateWindow(options)
 	options = options or {}
 	local theme = self.Theme
-	local gui = make("ScreenGui", { Name = "OrcaHubUI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling }, (gethui and gethui()) or game:GetService("CoreGui"))
+	local guiParent
+	if type(gethui) == "function" then
+		local ok, result = pcall(gethui)
+		if ok then guiParent = result end
+	end
+	guiParent = guiParent or game:GetService("CoreGui")
+	local gui = make("ScreenGui", { Name = "OrcaHubUI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling }, guiParent)
 	local root = make("Frame", { Name = "Window", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(780, 500), BackgroundColor3 = theme.Background, BorderSizePixel = 0, ClipsDescendants = true }, gui)
 	round(root, 13); outline(root, theme.Stroke)
 
@@ -98,12 +103,18 @@ function Library:CreateWindow(options)
 	round(search, 9); outline(search)
 	local scroll = make("ScrollingFrame", { Name = "Pages", Position = UDim2.new(0, 18, 0, 76), Size = UDim2.new(1, -36, 1, -92), BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 3, ScrollBarImageColor3 = theme.Accent, CanvasSize = UDim2.new() }, content)
 
-	local window = { Gui = gui, Root = root, Pages = {}, ActivePage = nil }
+	local window = { Gui = gui, Root = root, Pages = {}, ActivePage = nil, Connections = {} }
+	local function connect(signal, callback)
+		local connection = signal:Connect(callback)
+		table.insert(window.Connections, connection)
+		return connection
+	end
 	local function setPage(page)
 		if window.ActivePage then window.ActivePage.Frame.Visible = false; tween(window.ActivePage.Button, 0.15, { BackgroundColor3 = theme.Sidebar }) end
 		window.ActivePage = page
 		page.Frame.Visible = true
 		page:UpdateCanvas()
+		page:FilterControls(search.Text)
 		pageTitle.Text = page.Name
 		pageHint.Text = page.Description or ""
 		tween(page.Button, 0.15, { BackgroundColor3 = theme.Hover })
@@ -123,7 +134,7 @@ function Library:CreateWindow(options)
 		for i, side in ipairs({ "Left", "Right" }) do
 			columns[side] = make("Frame", { Position = UDim2.new((i - 1) * 0.5, i == 1 and 0 or 7, 0, 0), Size = UDim2.new(0.5, -7, 1, 0), BackgroundTransparency = 1 }, page.Frame)
 			page.ColumnLayouts[side] = make("UIListLayout", { Padding = UDim.new(0, 11), SortOrder = Enum.SortOrder.LayoutOrder }, columns[side])
-			page.ColumnLayouts[side]:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			connect(page.ColumnLayouts[side]:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 				if window.ActivePage == page then page:UpdateCanvas() end
 			end)
 		end
@@ -133,11 +144,25 @@ function Library:CreateWindow(options)
 			page.Frame.Size = UDim2.new(1, 0, 0, height)
 			if window.ActivePage == page then scroll.CanvasSize = UDim2.new(0, 0, 0, height) end
 		end
-		page.Button.MouseButton1Click:Connect(function() setPage(page) end)
+		function page:FilterControls(query)
+			query = string.lower(query or "")
+			for _, section in ipairs(page.Sections) do
+				local matches = 0
+				for _, entry in ipairs(section.Items) do
+					local visible = query == "" or string.find(string.lower(entry.Name), query, 1, true) ~= nil
+					entry.Frame.Visible = visible
+					if visible then matches = matches + 1 end
+				end
+				section.Frame.Visible = query == "" or matches > 0
+			end
+			page:UpdateCanvas()
+		end
+		connect(page.Button.MouseButton1Click, function() setPage(page) end)
 		function page:Section(sectionOptions)
 			sectionOptions = sectionOptions or {}
-			local section = { Items = {} }
 			local card = make("Frame", { Name = sectionOptions.Name or "Section", Size = UDim2.new(1, 0, 0, 40), AutomaticSize = Enum.AutomaticSize.Y, BackgroundColor3 = theme.Panel, BorderSizePixel = 0 }, columns[sectionOptions.Side == "Right" and "Right" or "Left"])
+			local section = { Frame = card, Items = {} }
+			table.insert(page.Sections, section)
 			round(card, 11); outline(card)
 			local heading = make("Frame", { Size = UDim2.new(1, 0, 0, 43), BackgroundTransparency = 1 }, card)
 			local headingIcon = iconImage(heading, sectionOptions.Icon or "box", 18)
@@ -146,11 +171,12 @@ function Library:CreateWindow(options)
 			title.Position = UDim2.new(0, headingIcon and 42 or 15, 0, 0); title.Size = UDim2.new(1, -55, 1, 0)
 			local body = make("Frame", { Position = UDim2.new(0, 12, 0, 45), Size = UDim2.new(1, -24, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1 }, card)
 			local bodyLayout = make("UIListLayout", { Padding = UDim.new(0, 3), SortOrder = Enum.SortOrder.LayoutOrder }, body)
-			bodyLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() card.Size = UDim2.new(1, 0, 0, bodyLayout.AbsoluteContentSize.Y + 57) end)
+			connect(bodyLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function() card.Size = UDim2.new(1, 0, 0, bodyLayout.AbsoluteContentSize.Y + 57) end)
 			local function row(name, height)
 				local holder = make("Frame", { Size = UDim2.new(1, 0, 0, height or 34), BackgroundTransparency = 1 }, body)
 				local text = label(holder, name, 13, theme.SubText)
 				text.Position = UDim2.new(0, 1, 0, 0); text.Size = UDim2.new(1, -45, 1, 0)
+				table.insert(section.Items, { Frame = holder, Name = tostring(name or "") })
 				return holder, text
 			end
 			function section:Label(item)
@@ -163,9 +189,10 @@ function Library:CreateWindow(options)
 				item = item or {}
 				local button = make("TextButton", { Size = UDim2.new(1, 0, 0, 34), BackgroundColor3 = theme.Element, BorderSizePixel = 0, Text = item.Name or "Button", TextColor3 = theme.Text, TextSize = 12, Font = Enum.Font.GothamMedium, AutoButtonColor = false }, body)
 				round(button, 7); outline(button, theme.Stroke)
-				button.MouseEnter:Connect(function() tween(button, 0.12, { BackgroundColor3 = theme.Hover }) end)
-				button.MouseLeave:Connect(function() tween(button, 0.12, { BackgroundColor3 = theme.Element }) end)
-				button.MouseButton1Click:Connect(function() if item.Callback then task.spawn(item.Callback) end end)
+				table.insert(section.Items, { Frame = button, Name = tostring(item.Name or "Button") })
+				connect(button.MouseEnter, function() tween(button, 0.12, { BackgroundColor3 = theme.Hover }) end)
+				connect(button.MouseLeave, function() tween(button, 0.12, { BackgroundColor3 = theme.Element }) end)
+				connect(button.MouseButton1Click, function() if item.Callback then task.spawn(item.Callback) end end)
 				return button
 			end
 			function section:Toggle(item)
@@ -184,7 +211,7 @@ function Library:CreateWindow(options)
 					if item.Flag then Library.Flags[item.Flag] = state end
 					if fire and item.Callback then task.spawn(item.Callback, state) end
 				end
-				hit.MouseButton1Click:Connect(function() set(not state, true) end)
+				connect(hit.MouseButton1Click, function() set(not state, true) end)
 				set(state, false)
 				return { Set = function(_, value) set(value, false) end, Get = function() return state end }
 			end
@@ -195,18 +222,27 @@ function Library:CreateWindow(options)
 		return page
 	end
 
-	function window:Destroy() gui:Destroy() end
+	connect(search:GetPropertyChangedSignal("Text"), function()
+		if window.ActivePage then window.ActivePage:FilterControls(search.Text) end
+	end)
+	function window:Destroy()
+		for _, connection in ipairs(window.Connections) do connection:Disconnect() end
+		table.clear(window.Connections)
+		gui:Destroy()
+	end
+	function window:SetVisible(visible) gui.Enabled = visible == true end
+	function window:Toggle() gui.Enabled = not gui.Enabled end
 	local dragging, dragStart, startPos
-	topbar.InputBegan:Connect(function(input)
+	connect(topbar.InputBegan, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; dragStart = input.Position; startPos = root.Position end
 	end)
-	UserInputService.InputChanged:Connect(function(input)
+	connect(UserInputService.InputChanged, function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			local delta = input.Position - dragStart
 			root.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 		end
 	end)
-	UserInputService.InputEnded:Connect(function(input)
+	connect(UserInputService.InputEnded, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 	end)
 	return window
