@@ -1,6 +1,6 @@
 # OrcaHub UI
 
-A compact, executor-friendly Roblox UI library focused on a clean dark interface, soft violet accents, and simple script-facing controls.
+A single-file, executor-friendly Roblox UI library with a responsive dark layout, animated violet accents, searchable tabs, and reusable controls. Rerunning `Example.lua` replaces the previous OrcaHub window and disconnects its library-managed input listeners.
 
 ## Load
 
@@ -42,6 +42,8 @@ Player:Button({
 Player:Label({ Name = "A clean starting point for your script." })
 ```
 
+The complete runnable showcase is in [`Example.lua`](Example.lua). It demonstrates the controls, search, collapsible sections, and window animations.
+
 ## Lucide icons
 
 Tabs and sections accept Lucide icon names. The library does not download assets automatically; provide an image map once your chosen Lucide image assets are available:
@@ -57,15 +59,23 @@ You may also use the `lucide-` prefix in the map key. Icons are optional; the co
 
 ## Current API
 
-- `OrcaHub:CreateWindow({ Title, Footer, Icon })`
+- `OrcaHub.Version` (currently `2.0.0`)
+- `OrcaHub:CreateWindow({ Title, Footer, Icon, Width, Height, Theme })`
 - `Window:Tab({ Name, Icon, Description })`
 - `Tab:Section({ Name, Icon, Side = "Left" | "Right" })`
 - `Section:Toggle({ Name, Default, Flag, Callback })`
 - `Section:Button({ Name, Callback })`
 - `Section:Label({ Name })`
+- `Section:Paragraph({ Name, Content, Height })`
+- `Section:Slider({ Name, Min, Max, Default, Decimals, Flag, Callback })`
+- `Section:Dropdown({ Name, Options, Default, Flag, Callback })`
+- `Section:Input({ Name, Placeholder, Default, Flag, Callback })`
+- `Section:Keybind({ Name, Default, Flag, Callback })`
 - `OrcaHub:LoadIcons(imageMap)`
 - Search filters control names on the active tab.
 - `Window:SetVisible(boolean)` and `Window:Toggle()`
+- `Window:Minimize()`
+- `Window:Notify({ Title, Content, Duration })`
 - `Window:Destroy()`
 
-`Window:Destroy()` disconnects the library's input listeners and removes its UI. Dropdowns, sliders, keybinds, persistence, and theme editing are planned for later iterations.
+Sections collapse from their headers. The layout adapts to the viewport and stacks its columns on narrower screens. Configure colors with `CreateWindow({ Theme = { Accent = Color3.fromRGB(...) } })`. Window entrance, page transitions, controls, minimize/close, and toast notifications are animated. `CreateWindow()` destroys the prior OrcaHub window before creating a new one. `Window:Destroy()` disconnects library-managed listeners and removes the UI.
